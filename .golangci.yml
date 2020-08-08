@@ -1,0 +1,39 @@
+linters-settings:
+  govet:
+    check-shadowing: true
+  golint:
+    min-confidence: 0.1
+  maligned:
+    suggest-new: true
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  gocritic:
+    enabled-tags:
+      - performance
+      - style
+      - diagnostic
+      - experimental
+      - opinionated
+    disabled-checks:
+      - whyNoLint
+  lll:
+    line-length: 140
+  gocyclo:
+    min-complexity: 10
+
+linters:
+  fast: false
+  enable-all: true
+  disable:
+    - godox
+    - testpackage
+    - gofumpt
+    - gofmt
+
+issues:
+  exclude-rules:
+    - text: "should have a package comment, unless it's in another file for this package"
+      linters:
+        - golint
+  exclude-use-default: false
