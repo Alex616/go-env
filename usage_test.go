@@ -61,14 +61,14 @@ func TestWriteUsage(t *testing.T) {
 		Output   []string     `env:"" help:"list of outputs"`
 		Name     string       `help:"name to use"`
 		Value    int          `help:"secret value"`
-		Verbose  bool         `env:"name:v" help:"verbosity level"`
+		Verbose  bool         `env:"v" help:"verbosity level"`
 		Dataset  string       `help:"dataset to use"`
-		Optimize int          `env:"name:O" help:"optimization level"`
+		Optimize int          `env:"O" help:"optimization level"`
 		Ids      []int64      `help:"Ids"`
 		Values   []float64    `help:"Values"`
-		Workers  int          `env:"name:WORKERS" help:"number of workers to start" default:"10"`
-		TestEnv  string       `env:"name:TEST_ENV"`
-		File     *NameDotName `env:"name:f" help:"File with mandatory extension"`
+		Workers  int          `env:"WORKERS" help:"number of workers to start" default:"10"`
+		TestEnv  string       `env:"TEST_ENV"`
+		File     *NameDotName `env:"f" help:"File with mandatory extension"`
 	}
 
 	args.Name = "Foo Bar"
