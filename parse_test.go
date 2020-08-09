@@ -38,7 +38,7 @@ func pparse(envs envsMap, dest interface{}) (*Parser, error) {
 }
 
 func TestString(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo string
 		Ptr *string
 	}
@@ -46,14 +46,14 @@ func TestString(t *testing.T) {
 	err := parse(envsMap{
 		"foo": "bar",
 		"ptr": "baz",
-	}, &args)
+	}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "bar", args.Foo)
-	assert.Equal(t, "baz", *args.Ptr)
+	assert.Equal(t, "bar", envs.Foo)
+	assert.Equal(t, "baz", *envs.Ptr)
 }
 
 func TestBool(t *testing.T) {
-	var args struct {
+	var envs struct {
 		A bool
 		B bool
 		C *bool
@@ -63,16 +63,16 @@ func TestBool(t *testing.T) {
 	err := parse(envsMap{
 		"a": "true",
 		"c": "true",
-	}, &args)
+	}, &envs)
 	require.NoError(t, err)
-	assert.True(t, args.A)
-	assert.False(t, args.B)
-	assert.True(t, *args.C)
-	assert.Nil(t, args.D)
+	assert.True(t, envs.A)
+	assert.False(t, envs.B)
+	assert.True(t, *envs.C)
+	assert.Nil(t, envs.D)
 }
 
 func TestInt(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo int
 		Ptr *int
 	}
@@ -80,26 +80,26 @@ func TestInt(t *testing.T) {
 	err := parse(envsMap{
 		"foo": "7",
 		"ptr": "8",
-	}, &args)
+	}, &envs)
 	require.NoError(t, err)
-	assert.EqualValues(t, 7, args.Foo)
-	assert.EqualValues(t, 8, *args.Ptr)
+	assert.EqualValues(t, 7, envs.Foo)
+	assert.EqualValues(t, 8, *envs.Ptr)
 }
 
 func TestNegativeInt(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo int
 	}
 
 	err := parse(envsMap{
 		"foo": "-100",
-	}, &args)
+	}, &envs)
 	require.NoError(t, err)
-	assert.EqualValues(t, args.Foo, -100)
+	assert.EqualValues(t, envs.Foo, -100)
 }
 
 func TestNegativeIntAndFloatAndTricks(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo int
 		Bar float64
 		N   int `env:"100"`
@@ -109,15 +109,15 @@ func TestNegativeIntAndFloatAndTricks(t *testing.T) {
 		"foo": "-100",
 		"bar": "-60.14",
 		"100": "-100",
-	}, &args)
+	}, &envs)
 	require.NoError(t, err)
-	assert.EqualValues(t, args.Foo, -100)
-	assert.EqualValues(t, args.Bar, -60.14)
-	assert.EqualValues(t, args.N, -100)
+	assert.EqualValues(t, envs.Foo, -100)
+	assert.EqualValues(t, envs.Bar, -60.14)
+	assert.EqualValues(t, envs.N, -100)
 }
 
 func TestUint(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo uint
 		Ptr *uint
 	}
@@ -125,14 +125,14 @@ func TestUint(t *testing.T) {
 	err := parse(envsMap{
 		"foo": "7",
 		"ptr": "8",
-	}, &args)
+	}, &envs)
 	require.NoError(t, err)
-	assert.EqualValues(t, 7, args.Foo)
-	assert.EqualValues(t, 8, *args.Ptr)
+	assert.EqualValues(t, 7, envs.Foo)
+	assert.EqualValues(t, 8, *envs.Ptr)
 }
 
 func TestFloat(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo float32
 		Ptr *float32
 	}
@@ -140,56 +140,56 @@ func TestFloat(t *testing.T) {
 	err := parse(envsMap{
 		"foo": "3.4",
 		"ptr": "3.5",
-	}, &args)
+	}, &envs)
 	require.NoError(t, err)
-	assert.EqualValues(t, 3.4, args.Foo)
-	assert.EqualValues(t, 3.5, *args.Ptr)
+	assert.EqualValues(t, 3.4, envs.Foo)
+	assert.EqualValues(t, 3.5, *envs.Ptr)
 }
 
 func TestDuration(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo time.Duration
 		Ptr *time.Duration
 	}
 
-	err := parse(envsMap{"foo": "3ms", "ptr": "4ms"}, &args)
+	err := parse(envsMap{"foo": "3ms", "ptr": "4ms"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, 3*time.Millisecond, args.Foo)
-	assert.Equal(t, 4*time.Millisecond, *args.Ptr)
+	assert.Equal(t, 3*time.Millisecond, envs.Foo)
+	assert.Equal(t, 4*time.Millisecond, *envs.Ptr)
 }
 
 func TestInvalidDuration(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo time.Duration
 	}
 
-	err := parse(envsMap{"foo": "xxx"}, &args)
+	err := parse(envsMap{"foo": "xxx"}, &envs)
 	require.Error(t, err)
 }
 
 func TestIntPtr(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo *int
 	}
 
-	err := parse(envsMap{"foo": "123"}, &args)
+	err := parse(envsMap{"foo": "123"}, &envs)
 	require.NoError(t, err)
-	require.NotNil(t, args.Foo)
-	assert.Equal(t, 123, *args.Foo)
+	require.NotNil(t, envs.Foo)
+	assert.Equal(t, 123, *envs.Foo)
 }
 
 func TestIntPtrNotPresent(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo *int
 	}
 
-	err := parse(envsMap{}, &args)
+	err := parse(envsMap{}, &envs)
 	require.NoError(t, err)
-	assert.Nil(t, args.Foo)
+	assert.Nil(t, envs.Foo)
 }
 
 func TestMixed(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo  string `env:"f"`
 		Bar  int
 		Baz  uint
@@ -197,191 +197,191 @@ func TestMixed(t *testing.T) {
 		Spam float32
 	}
 
-	args.Bar = 3
-	err := parse(envsMap{"baz": "123", "spam": "1.2", "ham": "true", "f": "xyz"}, &args)
+	envs.Bar = 3
+	err := parse(envsMap{"baz": "123", "spam": "1.2", "ham": "true", "f": "xyz"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "xyz", args.Foo)
-	assert.Equal(t, 3, args.Bar)
-	assert.Equal(t, uint(123), args.Baz)
-	assert.Equal(t, true, args.Ham)
-	assert.EqualValues(t, 1.2, args.Spam)
+	assert.Equal(t, "xyz", envs.Foo)
+	assert.Equal(t, 3, envs.Bar)
+	assert.Equal(t, uint(123), envs.Baz)
+	assert.Equal(t, true, envs.Ham)
+	assert.EqualValues(t, 1.2, envs.Spam)
 }
 
 func TestRequired(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo string `env:"required"`
 	}
 
-	err := parse(envsMap{}, &args)
+	err := parse(envsMap{}, &envs)
 	require.Error(t, err, "foo is required")
 }
 
 func TestLongFlag(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo string `env:"abc"`
 	}
 
-	err := parse(envsMap{"abc": "xyz"}, &args)
+	err := parse(envsMap{"abc": "xyz"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "xyz", args.Foo)
+	assert.Equal(t, "xyz", envs.Foo)
 }
 
 func TestCaseSensitive(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Lower bool `env:"v"`
 		Upper bool `env:"V"`
 	}
 
-	err := parse(envsMap{"v": "true"}, &args)
+	err := parse(envsMap{"v": "true"}, &envs)
 	require.NoError(t, err)
-	assert.True(t, args.Lower)
-	assert.False(t, args.Upper)
+	assert.True(t, envs.Lower)
+	assert.False(t, envs.Upper)
 }
 
 func TestCaseSensitive2(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Lower bool `env:"v"`
 		Upper bool `env:"V"`
 	}
 
-	err := parse(envsMap{"V": "true"}, &args)
+	err := parse(envsMap{"V": "true"}, &envs)
 	require.NoError(t, err)
-	assert.False(t, args.Lower)
-	assert.True(t, args.Upper)
+	assert.False(t, envs.Lower)
+	assert.True(t, envs.Upper)
 }
 
 func TestMultiple(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo []int
 		Bar []string
 	}
 
-	err := parse(envsMap{"foo": "1,2,3", "bar": "x,y,z"}, &args)
+	err := parse(envsMap{"foo": "1,2,3", "bar": "x,y,z"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, []int{1, 2, 3}, args.Foo)
-	assert.Equal(t, []string{"x", "y", "z"}, args.Bar)
+	assert.Equal(t, []int{1, 2, 3}, envs.Foo)
+	assert.Equal(t, []string{"x", "y", "z"}, envs.Bar)
 }
 
 func TestMultipleWithEq(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo []int
 		Bar []string
 	}
 
-	err := parse(envsMap{"foo": "1,2,3", "bar": "x"}, &args)
+	err := parse(envsMap{"foo": "1,2,3", "bar": "x"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, []int{1, 2, 3}, args.Foo)
-	assert.Equal(t, []string{"x"}, args.Bar)
+	assert.Equal(t, []int{1, 2, 3}, envs.Foo)
+	assert.Equal(t, []string{"x"}, envs.Bar)
 }
 
 func TestMultipleWithDefault(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo []int
 		Bar []string
 	}
 
-	args.Foo = []int{42}
-	args.Bar = []string{"foo"}
-	err := parse(envsMap{"foo": "1,2,3", "bar": "x,y,z"}, &args)
+	envs.Foo = []int{42}
+	envs.Bar = []string{"foo"}
+	err := parse(envsMap{"foo": "1,2,3", "bar": "x,y,z"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, []int{1, 2, 3}, args.Foo)
-	assert.Equal(t, []string{"x", "y", "z"}, args.Bar)
+	assert.Equal(t, []int{1, 2, 3}, envs.Foo)
+	assert.Equal(t, []string{"x", "y", "z"}, envs.Bar)
 }
 
 func TestExemptField(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo string
 		Bar interface{} `env:"-"`
 	}
 
-	err := parse(envsMap{"foo": "xyz"}, &args)
+	err := parse(envsMap{"foo": "xyz"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "xyz", args.Foo)
+	assert.Equal(t, "xyz", envs.Foo)
 }
 
 func TestMissingRequired(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo string `env:"required"`
 		X   string
 	}
 
-	err := parse(envsMap{"x": "bar"}, &args)
+	err := parse(envsMap{"x": "bar"}, &envs)
 	assert.Error(t, err)
 }
 
 func TestInvalidInt(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo int
 	}
 
-	err := parse(envsMap{"foo": "xyz"}, &args)
+	err := parse(envsMap{"foo": "xyz"}, &envs)
 	assert.Error(t, err)
 }
 
 func TestInvalidUint(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo uint
 	}
 
-	err := parse(envsMap{"foo": "xyz"}, &args)
+	err := parse(envsMap{"foo": "xyz"}, &envs)
 	assert.Error(t, err)
 }
 
 func TestInvalidFloat(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo float64
 	}
 
-	err := parse(envsMap{"foo": "xyz"}, &args)
+	err := parse(envsMap{"foo": "xyz"}, &envs)
 	require.Error(t, err)
 }
 
 func TestInvalidBool(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo bool
 	}
 
-	err := parse(envsMap{"foo": "xyz"}, &args)
+	err := parse(envsMap{"foo": "xyz"}, &envs)
 	require.Error(t, err)
 }
 
 func TestInvalidIntSlice(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo []int
 	}
 
-	err := parse(envsMap{"foo": "1 2 xyz"}, &args)
+	err := parse(envsMap{"foo": "1 2 xyz"}, &envs)
 	require.Error(t, err)
 }
 
 func TestErrorOnNonPointer(t *testing.T) {
-	var args struct{}
-	err := parse(envsMap{}, args)
+	var envs struct{}
+	err := parse(envsMap{}, envs)
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, ErrorNotPointers))
 }
 
 func TestErrorOnNonStruct(t *testing.T) {
-	var args string
-	err := parse(envsMap{}, &args)
+	var envs string
+	err := parse(envsMap{}, &envs)
 	assert.Error(t, err)
 }
 
 func TestUnsupportedType(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo interface{}
 	}
 
-	err := parse(envsMap{"foo": ""}, &args)
+	err := parse(envsMap{"foo": ""}, &envs)
 	assert.Error(t, err)
 }
 
 func TestUnsupportedSliceElement(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo []interface{}
 	}
 
-	err := parse(envsMap{"foo": "3"}, &args)
+	err := parse(envsMap{"foo": "3"}, &envs)
 	assert.Error(t, err)
 }
 
@@ -403,33 +403,33 @@ func TestUnknownTag(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo string
 	}
 
-	err := parse(envsMap{"foo": "bar"}, &args)
+	err := parse(envsMap{"foo": "bar"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "bar", args.Foo)
+	assert.Equal(t, "bar", envs.Foo)
 }
 
 func TestParseError(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo string `env:"this_is_not_valid:2"`
 	}
 
-	err := Parse(&args)
+	err := Parse(&envs)
 	assert.Error(t, err)
 }
 
 func TestMustParse(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo string
 	}
 
 	_ = os.Setenv("foo", "bar")
-	parser, err := MustParse(&args)
+	parser, err := MustParse(&envs)
 	require.NoError(t, err)
-	assert.Equal(t, "bar", args.Foo)
+	assert.Equal(t, "bar", envs.Foo)
 	assert.NotNil(t, parser)
 }
 
@@ -445,52 +445,52 @@ func (f *textUnmarshaler) UnmarshalText(b []byte) error {
 
 func TestTextUnmarshaler(t *testing.T) {
 	// fields that implement TextUnmarshaler should be parsed using that interface
-	var args struct {
+	var envs struct {
 		Foo textUnmarshaler
 	}
 
-	err := parse(envsMap{"foo": "abc"}, &args)
+	err := parse(envsMap{"foo": "abc"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, 3, args.Foo.val)
+	assert.Equal(t, 3, envs.Foo.val)
 }
 
 func TestPtrToTextUnmarshaler(t *testing.T) {
 	// fields that implement TextUnmarshaler should be parsed using that interface
-	var args struct {
+	var envs struct {
 		Foo *textUnmarshaler
 	}
 
-	err := parse(envsMap{"foo": "abc"}, &args)
+	err := parse(envsMap{"foo": "abc"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, 3, args.Foo.val)
+	assert.Equal(t, 3, envs.Foo.val)
 }
 
 func TestRepeatedTextUnmarshaler(t *testing.T) {
 	// fields that implement TextUnmarshaler should be parsed using that interface
-	var args struct {
+	var envs struct {
 		Foo []textUnmarshaler
 	}
 
-	err := parse(envsMap{"foo": "abc,d,ef"}, &args)
+	err := parse(envsMap{"foo": "abc,d,ef"}, &envs)
 	require.NoError(t, err)
-	require.Len(t, args.Foo, 3)
-	assert.Equal(t, 3, args.Foo[0].val)
-	assert.Equal(t, 1, args.Foo[1].val)
-	assert.Equal(t, 2, args.Foo[2].val)
+	require.Len(t, envs.Foo, 3)
+	assert.Equal(t, 3, envs.Foo[0].val)
+	assert.Equal(t, 1, envs.Foo[1].val)
+	assert.Equal(t, 2, envs.Foo[2].val)
 }
 
 func TestRepeatedPtrToTextUnmarshaler(t *testing.T) {
 	// fields that implement TextUnmarshaler should be parsed using that interface
-	var args struct {
+	var envs struct {
 		Foo []*textUnmarshaler
 	}
 
-	err := parse(envsMap{"foo": "abc,d,ef"}, &args)
+	err := parse(envsMap{"foo": "abc,d,ef"}, &envs)
 	require.NoError(t, err)
-	require.Len(t, args.Foo, 3)
-	assert.Equal(t, 3, args.Foo[0].val)
-	assert.Equal(t, 1, args.Foo[1].val)
-	assert.Equal(t, 2, args.Foo[2].val)
+	require.Len(t, envs.Foo, 3)
+	assert.Equal(t, 3, envs.Foo[0].val)
+	assert.Equal(t, 1, envs.Foo[1].val)
+	assert.Equal(t, 2, envs.Foo[2].val)
 }
 
 type boolUnmarshaler bool
@@ -504,13 +504,13 @@ func (p *boolUnmarshaler) UnmarshalText(b []byte) error {
 func TestBoolUnmarhsaler(t *testing.T) {
 	// test that a bool type that implements TextUnmarshaler is
 	// handled as a TextUnmarshaler not as a bool
-	var args struct {
+	var envs struct {
 		Foo *boolUnmarshaler
 	}
 
-	err := parse(envsMap{"foo": "ab"}, &args)
+	err := parse(envsMap{"foo": "ab"}, &envs)
 	require.NoError(t, err)
-	assert.EqualValues(t, true, *args.Foo)
+	assert.EqualValues(t, true, *envs.Foo)
 }
 
 type sliceUnmarshaler []int
@@ -524,94 +524,94 @@ func (p *sliceUnmarshaler) UnmarshalText(b []byte) error {
 func TestSliceUnmarhsaler(t *testing.T) {
 	// test that a slice type that implements TextUnmarshaler is
 	// handled as a TextUnmarshaler not as a slice
-	var args struct {
+	var envs struct {
 		Foo *sliceUnmarshaler
 		Bar string `env:""`
 	}
 
-	err := parse(envsMap{"foo": "abcde"}, &args)
+	err := parse(envsMap{"foo": "abcde"}, &envs)
 	require.NoError(t, err)
-	require.Len(t, *args.Foo, 1)
-	assert.EqualValues(t, 5, (*args.Foo)[0])
-	assert.Equal(t, "", args.Bar)
+	require.Len(t, *envs.Foo, 1)
+	assert.EqualValues(t, 5, (*envs.Foo)[0])
+	assert.Equal(t, "", envs.Bar)
 }
 
 func TestIP(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Host net.IP
 	}
 
-	err := parse(envsMap{"host": "192.168.0.1"}, &args)
+	err := parse(envsMap{"host": "192.168.0.1"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "192.168.0.1", args.Host.String())
+	assert.Equal(t, "192.168.0.1", envs.Host.String())
 }
 
 func TestPtrToIP(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Host *net.IP
 	}
 
-	err := parse(envsMap{"host": "192.168.0.1"}, &args)
+	err := parse(envsMap{"host": "192.168.0.1"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "192.168.0.1", args.Host.String())
+	assert.Equal(t, "192.168.0.1", envs.Host.String())
 }
 
 func TestIPSlice(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Host []net.IP
 	}
 
-	err := parse(envsMap{"host": "192.168.0.1,127.0.0.1"}, &args)
+	err := parse(envsMap{"host": "192.168.0.1,127.0.0.1"}, &envs)
 	require.NoError(t, err)
-	require.Len(t, args.Host, 2)
-	assert.Equal(t, "192.168.0.1", args.Host[0].String())
-	assert.Equal(t, "127.0.0.1", args.Host[1].String())
+	require.Len(t, envs.Host, 2)
+	assert.Equal(t, "192.168.0.1", envs.Host[0].String())
+	assert.Equal(t, "127.0.0.1", envs.Host[1].String())
 }
 
 func TestInvalidIPAddress(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Host net.IP
 	}
 
-	err := parse(envsMap{"host": "xxx"}, &args)
+	err := parse(envsMap{"host": "xxx"}, &envs)
 	assert.Error(t, err)
 }
 
 func TestMAC(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Host net.HardwareAddr
 	}
 
-	err := parse(envsMap{"host": "0123.4567.89ab"}, &args)
+	err := parse(envsMap{"host": "0123.4567.89ab"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "01:23:45:67:89:ab", args.Host.String())
+	assert.Equal(t, "01:23:45:67:89:ab", envs.Host.String())
 }
 
 func TestInvalidMac(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Host net.HardwareAddr
 	}
 
-	err := parse(envsMap{"host": "xxx"}, &args)
+	err := parse(envsMap{"host": "xxx"}, &envs)
 	assert.Error(t, err)
 }
 
 func TestMailAddr(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Recipient mail.Address
 	}
 
-	err := parse(envsMap{"recipient": "foo@example.com"}, &args)
+	err := parse(envsMap{"recipient": "foo@example.com"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "<foo@example.com>", args.Recipient.String())
+	assert.Equal(t, "<foo@example.com>", envs.Recipient.String())
 }
 
 func TestInvalidMailAddr(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Recipient mail.Address
 	}
 
-	err := parse(envsMap{"recipient": "xxx"}, &args)
+	err := parse(envsMap{"recipient": "xxx"}, &envs)
 	assert.Error(t, err)
 }
 
@@ -624,26 +624,26 @@ type B struct {
 }
 
 func TestEmbedded(t *testing.T) {
-	var args struct {
+	var envs struct {
 		A
 		B
 		Z bool
 	}
 
-	err := parse(envsMap{"x": "hello", "y": "321", "z": "true"}, &args)
+	err := parse(envsMap{"x": "hello", "y": "321", "z": "true"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "hello", args.X)
-	assert.Equal(t, 321, args.Y)
-	assert.Equal(t, true, args.Z)
+	assert.Equal(t, "hello", envs.X)
+	assert.Equal(t, 321, envs.Y)
+	assert.Equal(t, true, envs.Z)
 }
 
 func TestEmbeddedPtr(t *testing.T) {
 	// embedded pointer fields are not supported so this should return an error
-	var args struct {
+	var envs struct {
 		*A
 	}
 
-	err := parse(envsMap{"x": "hello"}, &args)
+	err := parse(envsMap{"x": "hello"}, &envs)
 	require.Error(t, err)
 }
 
@@ -651,18 +651,17 @@ func TestEmbeddedPtrIgnored(t *testing.T) {
 	// embedded pointer fields are not normally supported but here
 	// we explicitly exclude it so the non-nil embedded structs
 	// should work as expected
-	var args struct {
+	var envs struct {
 		*A `env:"-"`
 		B
 	}
 
-	err := parse(envsMap{"y": "321"}, &args)
+	err := parse(envsMap{"y": "321"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, 321, args.Y)
+	assert.Equal(t, 321, envs.Y)
 }
 
 func TestEmbeddedWithDuplicateField(t *testing.T) {
-	// see https://github.com/alexflint/go-arg/issues/100
 	type T struct {
 		A string `env:"cat"`
 	}
@@ -671,15 +670,15 @@ func TestEmbeddedWithDuplicateField(t *testing.T) {
 		A string `env:"dog"`
 	}
 
-	var args struct {
+	var envs struct {
 		T
 		U
 	}
 
-	err := parse(envsMap{"cat": "cat", "dog": "dog"}, &args)
+	err := parse(envsMap{"cat": "cat", "dog": "dog"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "cat", args.T.A)
-	assert.Equal(t, "dog", args.U.A)
+	assert.Equal(t, "cat", envs.T.A)
+	assert.Equal(t, "dog", envs.U.A)
 }
 
 func TestEmbeddedWithDuplicateField2(t *testing.T) {
@@ -691,28 +690,28 @@ func TestEmbeddedWithDuplicateField2(t *testing.T) {
 		A string
 	}
 
-	var args struct {
+	var envs struct {
 		T
 		U
 	}
 
-	err := parse(envsMap{"a": "xyz"}, &args)
+	err := parse(envsMap{"a": "xyz"}, &envs)
 	require.NoError(t, err)
-	assert.Equal(t, "xyz", args.T.A)
-	assert.Equal(t, "xyz", args.U.A)
+	assert.Equal(t, "xyz", envs.T.A)
+	assert.Equal(t, "xyz", envs.U.A)
 }
 
 func TestReuseParser(t *testing.T) {
-	var args struct {
+	var envs struct {
 		Foo string `env:"required"`
 	}
 
-	p, err := pparse(envsMap{"foo": "abc"}, &args)
+	p, err := pparse(envsMap{"foo": "abc"}, &envs)
 	require.NoError(t, err)
 
 	err = p.Parse()
 	require.NoError(t, err)
-	assert.Equal(t, args.Foo, "abc")
+	assert.Equal(t, envs.Foo, "abc")
 
 	os.Clearenv()
 
@@ -721,7 +720,7 @@ func TestReuseParser(t *testing.T) {
 }
 
 func TestDefaultOptionValues(t *testing.T) {
-	var args struct {
+	var envs struct {
 		A int      `default:"123"`
 		B *int     `default:"123"`
 		C string   `default:"abc"`
@@ -732,43 +731,43 @@ func TestDefaultOptionValues(t *testing.T) {
 		H *bool    `default:"true"`
 	}
 
-	err := parse(envsMap{"c": "xyz", "e": "4.56"}, &args)
+	err := parse(envsMap{"c": "xyz", "e": "4.56"}, &envs)
 	require.NoError(t, err)
 
-	assert.Equal(t, 123, args.A)
-	assert.Equal(t, 123, *args.B)
-	assert.Equal(t, "xyz", args.C)
-	assert.Equal(t, "abc", *args.D)
-	assert.Equal(t, 4.56, args.E)
-	assert.Equal(t, 1.23, *args.F)
-	assert.True(t, args.G)
-	assert.True(t, args.G)
+	assert.Equal(t, 123, envs.A)
+	assert.Equal(t, 123, *envs.B)
+	assert.Equal(t, "xyz", envs.C)
+	assert.Equal(t, "abc", *envs.D)
+	assert.Equal(t, 4.56, envs.E)
+	assert.Equal(t, 1.23, *envs.F)
+	assert.True(t, envs.G)
+	assert.True(t, envs.G)
 }
 
 func TestDefaultUnparseable(t *testing.T) {
-	var args struct {
+	var envs struct {
 		A int `default:"x"`
 	}
 
-	err := parse(envsMap{}, &args)
+	err := parse(envsMap{}, &envs)
 	assert.EqualError(t, err, `error processing default value for a: strconv.ParseInt: parsing "x": invalid syntax`)
 }
 
 func TestDefaultValuesNotAllowedWithRequired(t *testing.T) {
-	var args struct {
+	var envs struct {
 		A int `env:"required" default:"123"` // required not allowed with default!
 	}
 
-	err := parse(envsMap{}, &args)
+	err := parse(envsMap{}, &envs)
 	assert.EqualError(t, err, ".A: 'required' cannot be used when a default value is specified")
 }
 
 func TestDefaultValuesNotAllowedWithSlice(t *testing.T) {
-	var args struct {
+	var envs struct {
 		A []int `default:"123"` // required not allowed with default!
 	}
 
-	err := parse(envsMap{}, &args)
+	err := parse(envsMap{}, &envs)
 	assert.EqualError(t, err, ".A: default values are not supported for slice fields")
 }
 
