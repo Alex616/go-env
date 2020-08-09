@@ -102,7 +102,7 @@ func TestNegativeIntAndFloatAndTricks(t *testing.T) {
 	var args struct {
 		Foo int
 		Bar float64
-		N   int `env:"name:100"`
+		N   int `env:"100"`
 	}
 
 	err := parse(envsMap{
@@ -190,9 +190,9 @@ func TestIntPtrNotPresent(t *testing.T) {
 
 func TestMixed(t *testing.T) {
 	var args struct {
-		Foo  string `env:"name:f"`
+		Foo  string `env:"f"`
 		Bar  int
-		Baz  uint `env:""`
+		Baz  uint
 		Ham  bool
 		Spam float32
 	}
@@ -213,12 +213,12 @@ func TestRequired(t *testing.T) {
 	}
 
 	err := parse(envsMap{}, &args)
-	require.Error(t, err, "--foo is required")
+	require.Error(t, err, "foo is required")
 }
 
 func TestLongFlag(t *testing.T) {
 	var args struct {
-		Foo string `env:"name:abc"`
+		Foo string `env:"abc"`
 	}
 
 	err := parse(envsMap{"abc": "xyz"}, &args)
@@ -228,8 +228,8 @@ func TestLongFlag(t *testing.T) {
 
 func TestCaseSensitive(t *testing.T) {
 	var args struct {
-		Lower bool `env:"name:v"`
-		Upper bool `env:"name:V"`
+		Lower bool `env:"v"`
+		Upper bool `env:"V"`
 	}
 
 	err := parse(envsMap{"v": "true"}, &args)
@@ -240,8 +240,8 @@ func TestCaseSensitive(t *testing.T) {
 
 func TestCaseSensitive2(t *testing.T) {
 	var args struct {
-		Lower bool `env:"name:v"`
-		Upper bool `env:"name:V"`
+		Lower bool `env:"v"`
+		Upper bool `env:"V"`
 	}
 
 	err := parse(envsMap{"V": "true"}, &args)
@@ -303,15 +303,6 @@ func TestMissingRequired(t *testing.T) {
 	var args struct {
 		Foo string `env:"required"`
 		X   string
-	}
-
-	err := parse(envsMap{"x": "bar"}, &args)
-	assert.Error(t, err)
-}
-
-func TestNonsenseKey(t *testing.T) {
-	var args struct {
-		X string `env:"nonsense"`
 	}
 
 	err := parse(envsMap{"x": "bar"}, &args)
@@ -395,12 +386,20 @@ func TestUnsupportedSliceElement(t *testing.T) {
 }
 
 func TestUnknownTag(t *testing.T) {
-	var args struct {
-		Foo string `env:"this_is_not_valid"`
+	var envs struct {
+		Foo string `env:"this_is_not_valid:1"`
 	}
 
-	err := parse(envsMap{"foo": "xyz"}, &args)
+	err := parse(envsMap{"foo": "xyz"}, &envs)
 	assert.Error(t, err)
+
+	var envs2 struct {
+		Foo string `env:"name,name2"`
+	}
+
+	err = parse(envsMap{"name": "xyz"}, &envs2)
+	assert.Error(t, err)
+	assert.EqualError(t, err, ".Foo: name2-unrecognized tag")
 }
 
 func TestParse(t *testing.T) {
@@ -415,7 +414,7 @@ func TestParse(t *testing.T) {
 
 func TestParseError(t *testing.T) {
 	var args struct {
-		Foo string `env:"this_is_not_valid"`
+		Foo string `env:"this_is_not_valid:2"`
 	}
 
 	err := Parse(&args)
@@ -665,11 +664,11 @@ func TestEmbeddedPtrIgnored(t *testing.T) {
 func TestEmbeddedWithDuplicateField(t *testing.T) {
 	// see https://github.com/alexflint/go-arg/issues/100
 	type T struct {
-		A string `env:"name:cat"`
+		A string `env:"cat"`
 	}
 
 	type U struct {
-		A string `env:"name:dog"`
+		A string `env:"dog"`
 	}
 
 	var args struct {
@@ -771,4 +770,17 @@ func TestDefaultValuesNotAllowedWithSlice(t *testing.T) {
 
 	err := parse(envsMap{}, &args)
 	assert.EqualError(t, err, ".A: default values are not supported for slice fields")
+}
+
+func TestMultipleOptions(t *testing.T) {
+	var envs struct {
+		A string `env:"a, required"`
+	}
+
+	err := parse(envsMap{"a": "b"}, &envs)
+	assert.NoError(t, err)
+	err = parse(envsMap{}, &envs)
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, ErrorFieldIsRequired))
+	assert.EqualError(t, err, "a: field is required")
 }

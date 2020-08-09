@@ -101,9 +101,9 @@ Fetching the following IDs from foo: [1 2 3]
 
 ```go
 var envs struct {
-	Short         string  `env:"name:s"`
-	Long          string  `env:"name:custom-long-option"`
-	ShortAndLong  string  `env:"name:my-option"`
+	Short         string  `env:"s"`
+	Long          string  `env:"custom-long-option"`
+	ShortAndLong  string  `env:"my-option"`
 }
 env.MustParse(&envs)
 ```

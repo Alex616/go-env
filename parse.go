@@ -57,11 +57,17 @@ type spec struct {
 	boolean    bool
 
 	hasDefault bool
+	changeName bool
 }
 
-func (s *spec) SetDefault(def string) {
+func (s *spec) setDefault(def string) {
 	s.defaultVal = def
 	s.hasDefault = true
+}
+
+func (s *spec) setName(name string) {
+	s.name = name
+	s.changeName = true
 }
 
 // MustParse processes command line arguments and exits upon failure.
@@ -242,7 +248,7 @@ func walker(dest path, field *reflect.StructField, t reflect.Type) (*spec, bool,
 	}
 
 	if defaultVal, exists := field.Tag.Lookup("default"); exists {
-		sp.SetDefault(defaultVal)
+		sp.setDefault(defaultVal)
 	}
 
 	// Look at the tag
@@ -282,14 +288,14 @@ func lookAtTag(tag string, sp *spec) error {
 		}
 
 		switch {
-		case key == "name" && value != "":
-			sp.name = value
 		case key == "required":
 			if sp.hasDefault {
 				return ErrorRequiredWithDefault
 			}
 
 			sp.required = true
+		case value == "" && !sp.changeName:
+			sp.setName(key)
 		default:
 			return fmt.Errorf("%s-%w", key, ErrorUnrecognizedTag)
 		}
